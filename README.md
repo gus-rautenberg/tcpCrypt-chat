@@ -1,4 +1,4 @@
-# tcpCrypt-chat - back-end
+# tcpCrypt-chat - server
 
 This is a terminal UI chat application being developed in _Java_ using _TCP sockets_. The project is a **work in progress** and aims to enable secure and direct communication between users via the terminal, utilizing encryption to ensure the confidentiality of transmitted messages.
 
