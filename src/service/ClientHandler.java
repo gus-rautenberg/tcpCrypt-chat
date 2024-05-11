@@ -16,6 +16,7 @@ public class ClientHandler implements Runnable {
     private Socket clientSocket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    private ChatRoomService chatRoomService;
     // private BufferedInputStream;
     private String clientUsername;
 
@@ -26,7 +27,9 @@ public class ClientHandler implements Runnable {
             this.bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.clientUsername = bufferedReader.readLine();
             clientHandlers.add(this);
-            broadcastMessage("SERVER: " + clientUsername + " has entered the chat");
+            // broadcastMessage("SERVER: " + clientUsername + " has entered the chat");
+            
+            this.chatRoomService = ChatRoomService.getInstance();
         } catch (IOException e) {
             closeEverything(clientSocket, bufferedReader, bufferedWriter);
         }
@@ -39,7 +42,84 @@ public class ClientHandler implements Runnable {
                 String messageFromClient;
 
                 messageFromClient = bufferedReader.readLine();
-                broadcastMessage(messageFromClient);
+                String[] words = messageFromClient.split(" ");
+                String messageToSend;
+                switch (words[0]) {
+                    case "CRIAR_SALA":
+                        if(chatRoomService.chatRoomNameExists(words[2])) {
+                            System.out.println("Chat Room Name already exists");
+                            messageToSend = "Chat Room Name already exists. Enter a new name";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
+                            break;
+                        }
+
+                        if(words[1].equals("PUBLICA")) {
+                            chatRoomService.createPublicChatRoom(words[2], clientSocket.getRemoteSocketAddress().toString());
+                            System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
+
+                        } else {
+                            chatRoomService.createPrivateChatRoom(words[2], words[3], clientSocket.getRemoteSocketAddress().toString());
+                        }
+                        break;
+                    case "LISTAR_SALAS":
+                        for(ClientHandler ClientHandler : clientHandlers) {
+                            if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                messageToSend = chatRoomService.getAllChatRooms().toString();
+                                ClientHandler.bufferedWriter.write(chatRoomService.getAllChatRooms().toString());
+                                ClientHandler.bufferedWriter.newLine();
+                                ClientHandler.bufferedWriter.flush(); 
+                            }
+                        }
+                        break;
+                    case "ENTRAR_SALA":
+                        int index = chatRoomService.getChatRoomIndexByName(words[2]);
+                        System.out.println("Index: " + index);
+                        if(!chatRoomService.chatRoomNameExists(words[2])) {
+                            System.out.println("Chat Room does not exist or tipped wrong name");
+                            messageToSend = "Chat Room does not exist or tipped wrong name";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            break;
+                        }
+                        if(chatRoomService.requiresPassword(index) && !chatRoomService.comparePassword(index, words[3])) {
+                            System.out.println("Wrong password");
+                            messageToSend = "Wrong password";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                               }
+                            }
+                            break;
+                        }
+                        String userPort = clientSocket.getRemoteSocketAddress().toString();
+                        chatRoomService.joinChatRoom(index, userPort);
+
+                        break;
+                    case "SAIR_SALA":
+                        break;
+                    case "ENVIAR_MENSAGEM":
+                        break;
+                    case "FECHAR_SALA":
+                        break;
+                    case "BANIR_USUARIO":
+                    default:
+                        break;
+                }
+                // broadcastMessage(messageFromClient);
             } catch (IOException e) {
                 closeEverything(clientSocket, bufferedReader, bufferedWriter);
                 break;

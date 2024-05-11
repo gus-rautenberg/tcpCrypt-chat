@@ -25,7 +25,7 @@ public class Server {
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Client connected: " + clientSocket.getChannel());
+                System.out.println("Client connected: " + clientSocket.getRemoteSocketAddress());
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 Thread threadClientHandler = new Thread(clientHandler);
                 threadClientHandler.start();
