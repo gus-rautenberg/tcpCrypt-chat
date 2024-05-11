@@ -1,6 +1,7 @@
 package service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import model.ChatRoom;
 
@@ -33,7 +34,6 @@ public class ChatRoomService {
         chatRooms.add(new ChatRoom(roomName, password, admin));
     }
     public boolean chatRoomNameExists(String roomName){
-
         for (ChatRoom chatRoom : chatRooms) {
             if (chatRoom.getName().equals(roomName)) {
                 return true;
@@ -49,6 +49,9 @@ public class ChatRoomService {
         }
         return null;
     }
+    public int getListSize(){
+        return chatRooms.size();
+    }
 
     public int getChatRoomIndexByName(String roomName) {
         for(int i = 0; i<chatRooms.size();i++){
@@ -60,11 +63,13 @@ public class ChatRoomService {
     }
 
     public boolean requiresPassword(int index) {
+        System.out.println("Precisa de ssenha: " + chatRooms.get(index).requiresPassword());
         return chatRooms.get(index).requiresPassword();
     }
 
     public boolean comparePassword(int index, String password) {
         String passString = chatRooms.get(index).getPasswordHash();
+        System.out.println("Senha:" + chatRooms.get(index).getPasswordHash() + "Senha passada: " + password);
         if(passString.equals(password)){ 
             return true;
         }
@@ -85,7 +90,9 @@ public class ChatRoomService {
     public void joinChatRoom(int index, String userPort) {
         chatRooms.get(index).addParticipant(userPort);
     }
-
+    public Set<String> showParticipants(int index) {
+        return chatRooms.get(index).getParticipants();
+    }
     public enum RoomType {
         PUBLIC,
         PRIVATE
