@@ -79,9 +79,13 @@ public class ClientHandler implements Runnable {
                         }
                         break;
                     case "ENTRAR_SALA":
-                        int index = chatRoomService.getChatRoomIndexByName(words[2]);
-                        System.out.println("Index: " + index);
-                        if(!chatRoomService.chatRoomNameExists(words[2])) {
+                        
+                        // System.out.println("Words[3]: " + words);
+                        // for(int i = 0; i < words.length; i++) {
+                        //     System.out.println(words[i]);
+                        // }
+                    // System.out.println("teste: " + chatRoomService.chatRoomNameExists(words[3]) + " " + chatRoomService.getListSize());
+                        if(!chatRoomService.chatRoomNameExists(words[1])) {
                             System.out.println("Chat Room does not exist or tipped wrong name");
                             messageToSend = "Chat Room does not exist or tipped wrong name";
                             for(ClientHandler ClientHandler : clientHandlers) {
@@ -93,7 +97,9 @@ public class ClientHandler implements Runnable {
                             }
                             break;
                         }
-                        if(chatRoomService.requiresPassword(index) && !chatRoomService.comparePassword(index, words[3])) {
+                        int index = chatRoomService.getChatRoomIndexByName(words[1]);
+                        // System.out.println("Teste1:" + !chatRoomService.comparePassword(index, words[2]));
+                        if(chatRoomService.requiresPassword(index) && !chatRoomService.comparePassword(index, words[2])) {
                             System.out.println("Wrong password");
                             messageToSend = "Wrong password";
                             for(ClientHandler ClientHandler : clientHandlers) {
@@ -107,6 +113,7 @@ public class ClientHandler implements Runnable {
                         }
                         String userPort = clientSocket.getRemoteSocketAddress().toString();
                         chatRoomService.joinChatRoom(index, userPort);
+                        System.out.println("Chat Room Joined: " + chatRoomService.showParticipants(index));
 
                         break;
                     case "SAIR_SALA":
