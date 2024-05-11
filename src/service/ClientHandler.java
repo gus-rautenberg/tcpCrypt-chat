@@ -112,6 +112,24 @@ public class ClientHandler implements Runnable {
                     case "SAIR_SALA":
                         break;
                     case "ENVIAR_MENSAGEM":
+                        if(chatRoomService.chatRoomNameExists(words[1])){  
+                            System.out.println("Chat Room does not exist or tipped wrong name");
+                            messageToSend = "Chat Room does not exist or tipped wrong name";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            break;
+                        }
+                        // fazer listagem + adcionar os usarios no meu chatHandler
+                        //index = chatRoomService.getChatRoomIndexByName(words[1]);
+                        //broadcastMessage(words[3]);
+                        
+
+
                         break;
                     case "FECHAR_SALA":
                         break;
