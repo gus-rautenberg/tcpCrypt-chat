@@ -134,14 +134,14 @@ public class ClientHandler implements Runnable {
                     }
 
                     // fazer listagem + adcionar os usarios no meu chatHandler
-                    System.out.println("Message: " + words[2]);
-                    System.out.println("Chat Room: " + words[1]);   
+                    //System.out.println("Message: " + words[2]);
+                    //System.out.println("Chat Room: " + words[1]);   
                     index = chatRoomService.getChatRoomIndexByName(words[1]);
                     Set<String> chat_participants;
                     chat_participants = chatRoomService.showParticipants(index);
-                    System.out.println("Participants: " + chat_participants);
+                    //System.out.println("Participants: " + chat_participants);
                     for(String participant : chat_participants){
-                        broadcastMessageChat(words[2], participant);
+                        broadcastMessageChat(words[2], participant, words[1]);
                     }
                     break;
                     case "FECHAR_SALA":
@@ -172,15 +172,12 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void broadcastMessageChat(String messageToSend, String participants) {
+    public void broadcastMessageChat(String messageToSend, String participants, String chatRoom) {
         for(ClientHandler clientHandler : clientHandlers) {
-            System.out.println(clientHandler.clientUsername);
             try {
-                System.out.println("2 condição: " + clientHandler.clientUsername.equals(participants));
-                System.out.println("participants: " + participants);
                 if(!clientHandler.clientUsername.equals(clientUsername) && clientHandler.clientUsername.equals(participants)){
-                    System.out.println("entrou");
-                    clientHandler.bufferedWriter.write(messageToSend);
+                    String finalMessage = "MENSAGEM " + chatRoom + " " + clientUsername + ": " + messageToSend;
+                    clientHandler.bufferedWriter.write(finalMessage);
                     clientHandler.bufferedWriter.newLine();
                     clientHandler.bufferedWriter.flush(); 
                 }
