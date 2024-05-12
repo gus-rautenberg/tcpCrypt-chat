@@ -35,6 +35,10 @@ public class ChatRoom {
         return name;
     }
 
+    public String getAdmin() {
+        return adminPort;
+    }
+
     public boolean isPrivate() {
         return isPrivate;
     }

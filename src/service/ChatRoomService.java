@@ -42,6 +42,7 @@ public class ChatRoomService {
         return false;
     }
     public ChatRoom getChatRoomByName(String roomName) {
+        // chatRooms.contains(oomName);
         for (ChatRoom chatRoom : chatRooms) {
             if (chatRoom.getName().equals(roomName)) {
                 return chatRoom;
@@ -90,6 +91,19 @@ public class ChatRoomService {
     public void joinChatRoom(int index, String userPort) {
         chatRooms.get(index).addParticipant(userPort);
     }
+
+    public void leaveChatRoom(int index, String userPort) {
+        chatRooms.get(index).removeParticipant(userPort);
+    }
+    public boolean checkUserInChatRoom(String userPort, int index) {
+        return chatRooms.get(index).getParticipants().contains(userPort);
+    }
+
+    public boolean checkAdminInChatRoom(String username, int index) {
+        System.out.println("admin:" + chatRooms.get(index).getAdmin() + " username: " + username);
+        return chatRooms.get(index).getAdmin().equals(username);
+    }
+
     public Set<String> showParticipants(int index) {
         return chatRooms.get(index).getParticipants();
     }
@@ -97,6 +111,9 @@ public class ChatRoomService {
         PUBLIC,
         PRIVATE
     }
-
+    public void closeChatRoom(int index) {
+        chatRooms.remove(index);
     }
+
+}
 

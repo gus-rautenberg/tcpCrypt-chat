@@ -59,13 +59,12 @@ public class ClientHandler implements Runnable {
                             System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
                             break;
                         }
-
                         if(words[1].equals("PUBLICA")) {
-                            chatRoomService.createPublicChatRoom(words[2], clientSocket.getRemoteSocketAddress().toString());
+                            chatRoomService.createPublicChatRoom(words[2], clientUsername);
                             System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
 
                         } else {
-                            chatRoomService.createPrivateChatRoom(words[2], words[3], clientSocket.getRemoteSocketAddress().toString());
+                            chatRoomService.createPrivateChatRoom(words[2], words[3], clientUsername);
                         }
                         break;
                     case "LISTAR_SALAS":
@@ -111,18 +110,75 @@ public class ClientHandler implements Runnable {
                             }
                             break;
                         }
-                        String userPort = clientSocket.getRemoteSocketAddress().toString();
-                        chatRoomService.joinChatRoom(index, userPort);
+                        chatRoomService.joinChatRoom(index, clientUsername);
                         System.out.println("Chat Room Joined: " + chatRoomService.showParticipants(index));
 
                         break;
                     case "SAIR_SALA":
+                        if(!chatRoomService.chatRoomNameExists(words[1])) {
+                            System.out.println("Chat Room does not exist or tipped wrong name");
+                            messageToSend = "Chat Room does not exist or tipped wrong name";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            break;
+                        }
+                        index = chatRoomService.getChatRoomIndexByName(words[1]);
+                        if(!chatRoomService.checkUserInChatRoom(clientUsername, index)) {
+                            System.out.println("Client is not a member in this Room");
+                            messageToSend = "You're not a member in this Room";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            break;
+                        }
+                        chatRoomService.leaveChatRoom(index, clientUsername);
+                        System.out.println("Chat Room Participants: " + chatRoomService.showParticipants(index));
                         break;
                     case "ENVIAR_MENSAGEM":
+
                         break;
+
                     case "FECHAR_SALA":
+                        if(!chatRoomService.chatRoomNameExists(words[1])) {
+                            System.out.println("Chat Room does not exist or tipped wrong name");
+                            messageToSend = "Chat Room does not exist or tipped wrong name";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            break;
+                        }
+                        index = chatRoomService.getChatRoomIndexByName(words[1]);
+                        System.out.println("Client Username: " + clientUsername);
+                        if(!chatRoomService.checkAdminInChatRoom(clientUsername, index)) {
+                            System.out.println("Client is not an administrator in this Room");
+                            messageToSend = "You're not an administrator in this Room";
+                            for(ClientHandler ClientHandler : clientHandlers) {
+                                if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush(); 
+                                }
+                            }
+                            break;
+                        }
+                        chatRoomService.closeChatRoom(index);
                         break;
+
                     case "BANIR_USUARIO":
+                        break;
                     default:
                         break;
                 }
