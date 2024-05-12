@@ -136,9 +136,23 @@ public class ClientHandler implements Runnable {
                     // fazer listagem + adcionar os usarios no meu chatHandler
                     //System.out.println("Message: " + words[2]);
                     //System.out.println("Chat Room: " + words[1]);   
+                    //System.out.println("Cliente : " +  clientUsername);
                     index = chatRoomService.getChatRoomIndexByName(words[1]);
                     Set<String> chat_participants;
                     chat_participants = chatRoomService.showParticipants(index);
+                    if(!chat_participants.contains(clientUsername)){
+                        System.out.println("The user does not belong to the room");
+                        messageToSend = "The user does not belong to the room";
+                        for(ClientHandler ClientHandler : clientHandlers) {
+                            if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                ClientHandler.bufferedWriter.write(messageToSend);
+                                ClientHandler.bufferedWriter.newLine();
+                                ClientHandler.bufferedWriter.flush(); 
+                            }
+                        }
+                        break;
+                    }
+
                     //System.out.println("Participants: " + chat_participants);
                     for(String participant : chat_participants){
                         broadcastMessageChat(words[2], participant, words[1]);
