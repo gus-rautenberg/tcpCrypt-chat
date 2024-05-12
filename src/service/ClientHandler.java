@@ -182,8 +182,15 @@ public class ClientHandler implements Runnable {
 
                     //for que vai comecar do words2 até o final, String Message +=  " " + words[i]
                     //System.out.println("Participants: " + chat_participants);
+                    String entireMessage = words[2];
+                    for(int i = 3; i < words.length; i++){
+                        //System.out.println(words[i]);
+                        entireMessage += " " + words[i];
+                    }
+                    // System.out.println(entireMessage);
+
                     for(String participant : chat_participants){
-                        broadcastMessageChat(words[2], participant, words[1]); 
+                        broadcastMessageChat(entireMessage, participant, words[1]); 
                     }
                     break;
 
