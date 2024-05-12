@@ -1,4 +1,5 @@
 package service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,15 +26,16 @@ public class ChatRoomService {
     }
 
     public void createPublicChatRoom(String roomName, String admin) {
-    // Lógica para criar uma sala de chat pública
-        chatRooms.add(new ChatRoom(roomName, admin ));
+        // Lógica para criar uma sala de chat pública
+        chatRooms.add(new ChatRoom(roomName, admin));
     }
 
     public void createPrivateChatRoom(String roomName, String password, String admin) {
         // Lógica para criar uma sala de chat privada
         chatRooms.add(new ChatRoom(roomName, password, admin));
     }
-    public boolean chatRoomNameExists(String roomName){
+
+    public boolean chatRoomNameExists(String roomName) {
         for (ChatRoom chatRoom : chatRooms) {
             if (chatRoom.getName().equals(roomName)) {
                 return true;
@@ -41,6 +43,7 @@ public class ChatRoomService {
         }
         return false;
     }
+
     public ChatRoom getChatRoomByName(String roomName) {
         // chatRooms.contains(oomName);
         for (ChatRoom chatRoom : chatRooms) {
@@ -50,13 +53,14 @@ public class ChatRoomService {
         }
         return null;
     }
-    public int getListSize(){
+
+    public int getListSize() {
         return chatRooms.size();
     }
 
     public int getChatRoomIndexByName(String roomName) {
-        for(int i = 0; i<chatRooms.size();i++){
-            if(chatRooms.get(i).getName().equals(roomName)){
+        for (int i = 0; i < chatRooms.size(); i++) {
+            if (chatRooms.get(i).getName().equals(roomName)) {
                 return i;
             }
         }
@@ -71,21 +75,24 @@ public class ChatRoomService {
     public boolean comparePassword(int index, String password) {
         String passString = chatRooms.get(index).getPasswordHash();
         System.out.println("Senha:" + chatRooms.get(index).getPasswordHash() + "Senha passada: " + password);
-        if(passString.equals(password)){ 
+        if (passString.equals(password)) {
             return true;
         }
         return false;
     }
-    
+
+    public void banUser(int index, String username) {
+        chatRooms.get(index).removeParticipant(username);
+    }
 
     // public boolean chatRoomNameUnique(String roomName){
 
-    //     for (ChatRoom chatRoom : chatRooms) {
-    //         if (chatRoom.getName().equals(roomName)) {
-    //             return false;
-    //         }
-    //     }
-    //     return true;
+    // for (ChatRoom chatRoom : chatRooms) {
+    // if (chatRoom.getName().equals(roomName)) {
+    // return false;
+    // }
+    // }
+    // return true;
     // }
     // Outros métodos para gerenciar as salas de chat
     public void joinChatRoom(int index, String userPort) {
@@ -95,6 +102,7 @@ public class ChatRoomService {
     public void leaveChatRoom(int index, String userPort) {
         chatRooms.get(index).removeParticipant(userPort);
     }
+
     public boolean checkUserInChatRoom(String userPort, int index) {
         return chatRooms.get(index).getParticipants().contains(userPort);
     }
@@ -107,13 +115,14 @@ public class ChatRoomService {
     public Set<String> showParticipants(int index) {
         return chatRooms.get(index).getParticipants();
     }
+
     public enum RoomType {
         PUBLIC,
         PRIVATE
     }
+
     public void closeChatRoom(int index) {
         chatRooms.remove(index);
     }
 
 }
-
