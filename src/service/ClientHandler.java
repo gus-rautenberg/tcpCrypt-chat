@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.util.Set;
 
 public class ClientHandler implements Runnable {
     public static ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
@@ -59,7 +60,8 @@ public class ClientHandler implements Runnable {
                             System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
                             break;
                         }
-                        if (words[1].equals("PUBLICA")) {
+                        if(words[1].equals("PUBLICA")) {
+
                             chatRoomService.createPublicChatRoom(words[2], clientUsername);
                             System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
 
@@ -113,6 +115,7 @@ public class ClientHandler implements Runnable {
                             }
                             break;
                         }
+
                         chatRoomService.joinChatRoom(index, clientUsername);
                         System.out.println("Chat Room Joined: " + chatRoomService.showParticipants(index));
 
@@ -148,7 +151,44 @@ public class ClientHandler implements Runnable {
                         break;
                     case "ENVIAR_MENSAGEM":
 
+                    if(!chatRoomService.chatRoomNameExists(words[1])){  
+                        System.out.println("Chat Room does not exist or tipped wrong name");
+                        messageToSend = "Chat Room does not exist or tipped wrong name";
+                        for(ClientHandler ClientHandler : clientHandlers) {
+                            if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                ClientHandler.bufferedWriter.write(messageToSend);
+                                ClientHandler.bufferedWriter.newLine();
+                                ClientHandler.bufferedWriter.flush(); 
+                            }
+                        }
                         break;
+                    }
+
+                    // fazer listagem + adcionar os usarios no meu chatHandler
+                    //System.out.println("Message: " + words[2]);
+                    //System.out.println("Chat Room: " + words[1]);   
+                    //System.out.println("Cliente : " +  clientUsername);
+                    index = chatRoomService.getChatRoomIndexByName(words[1]);
+                    Set<String> chat_participants;
+                    chat_participants = chatRoomService.showParticipants(index);
+                    if(!chat_participants.contains(clientUsername)){
+                        System.out.println("The user does not belong to the room");
+                        messageToSend = "The user does not belong to the room";
+                        for(ClientHandler ClientHandler : clientHandlers) {
+                            if(ClientHandler.clientUsername.equals(clientUsername)) {
+                                ClientHandler.bufferedWriter.write(messageToSend);
+                                ClientHandler.bufferedWriter.newLine();
+                                ClientHandler.bufferedWriter.flush(); 
+                            }
+                        }
+                        break;
+                    }
+
+                    //System.out.println("Participants: " + chat_participants);
+                    for(String participant : chat_participants){
+                        broadcastMessageChat(words[2], participant, words[1]);
+                    }
+                    break;
 
                     case "FECHAR_SALA":
                         if (!chatRoomService.chatRoomNameExists(words[1])) {
@@ -226,6 +266,21 @@ public class ClientHandler implements Runnable {
                     clientHandler.bufferedWriter.write(messageToSend);
                     clientHandler.bufferedWriter.newLine();
                     clientHandler.bufferedWriter.flush();
+                }
+            } catch (IOException e) {
+                closeEverything(clientSocket, bufferedReader, bufferedWriter);
+            }
+        }
+    }
+
+    public void broadcastMessageChat(String messageToSend, String participants, String chatRoom) {
+        for(ClientHandler clientHandler : clientHandlers) {
+            try {
+                if(!clientHandler.clientUsername.equals(clientUsername) && clientHandler.clientUsername.equals(participants)){
+                    String finalMessage = "MENSAGEM " + chatRoom + " " + clientUsername + ": " + messageToSend;
+                    clientHandler.bufferedWriter.write(finalMessage);
+                    clientHandler.bufferedWriter.newLine();
+                    clientHandler.bufferedWriter.flush(); 
                 }
             } catch (IOException e) {
                 closeEverything(clientSocket, bufferedReader, bufferedWriter);
