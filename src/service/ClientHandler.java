@@ -72,7 +72,7 @@ public class ClientHandler implements Runnable {
                     case "LISTAR_SALAS":
                         for (ClientHandler ClientHandler : clientHandlers) {
                             if (ClientHandler.clientUsername.equals(clientUsername)) {
-                                messageToSend = chatRoomService.getAllChatRooms().toString();
+                                messageToSend = chatRoomService.getAllChatRooms().toString(); // arrumar print
                                 ClientHandler.bufferedWriter.write(chatRoomService.getAllChatRooms().toString());
                                 ClientHandler.bufferedWriter.newLine();
                                 ClientHandler.bufferedWriter.flush();
@@ -81,13 +81,8 @@ public class ClientHandler implements Runnable {
                         break;
                     case "ENTRAR_SALA":
 
-                        // System.out.println("Words[3]: " + words);
-                        // for(int i = 0; i < words.length; i++) {
-                        // System.out.println(words[i]);
-                        // }
-                        // System.out.println("teste: " + chatRoomService.chatRoomNameExists(words[3]) +
-                        // " " + chatRoomService.getListSize());
-                        if (!chatRoomService.chatRoomNameExists(words[1])) {
+                        // nao estou checando se o usuario ja esta na sala
+                        if (!chatRoomService.chatRoomNameExists(words[1])) { 
                             System.out.println("Chat Room does not exist or tipped wrong name");
                             messageToSend = "Chat Room does not exist or tipped wrong name";
                             for (ClientHandler ClientHandler : clientHandlers) {
@@ -149,6 +144,7 @@ public class ClientHandler implements Runnable {
                         chatRoomService.leaveChatRoom(index, clientUsername);
                         System.out.println("Chat Room Participants: " + chatRoomService.showParticipants(index));
                         break;
+
                     case "ENVIAR_MENSAGEM":
 
                     if(!chatRoomService.chatRoomNameExists(words[1])){  
@@ -184,9 +180,10 @@ public class ClientHandler implements Runnable {
                         break;
                     }
 
+                    //for que vai comecar do words2 até o final, String Message +=  " " + words[i]
                     //System.out.println("Participants: " + chat_participants);
                     for(String participant : chat_participants){
-                        broadcastMessageChat(words[2], participant, words[1]);
+                        broadcastMessageChat(words[2], participant, words[1]); 
                     }
                     break;
 
@@ -234,6 +231,18 @@ public class ClientHandler implements Runnable {
                             break;
                         }
                         index = chatRoomService.getChatRoomIndexByName(words[1]);
+                        if (!chatRoomService.checkAdminInChatRoom(clientUsername, index)) {
+                            System.out.println("Client is not an administrator in this Room");
+                            messageToSend = "You're not an administrator in this Room";
+                            for (ClientHandler ClientHandler : clientHandlers) {
+                                if (ClientHandler.clientUsername.equals(clientUsername)) {
+                                    ClientHandler.bufferedWriter.write(messageToSend);
+                                    ClientHandler.bufferedWriter.newLine();
+                                    ClientHandler.bufferedWriter.flush();
+                                }
+                            }
+                            break;
+                        }
                         if (!chatRoomService.checkUserInChatRoom(words[2], index)) {
                             System.out.println("User does not exist or tipped wrong name");
                             messageToSend = "User does not exist or tipped wrong name";
