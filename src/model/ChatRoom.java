@@ -7,15 +7,15 @@ public class ChatRoom {
 
     private String name;
     private boolean isPrivate;
-    private String passwordHash; 
+    private String passwordHash;
     private Set<String> participants;
-    private String adminPort; 
+    private String adminPort;
 
     // Construtor para sala pública (sem senha)
     public ChatRoom(String name, String adminPort) {
         this.name = name;
-        this.isPrivate = false; 
-        this.passwordHash = null; 
+        this.isPrivate = false;
+        this.passwordHash = null;
         this.participants = new HashSet<>();
         this.adminPort = adminPort;
         participants.add(adminPort);
@@ -24,7 +24,7 @@ public class ChatRoom {
     // Construtor para sala privada (com senha)
     public ChatRoom(String name, String passwordHash, String adminPort) {
         this.name = name;
-        this.isPrivate = true; 
+        this.isPrivate = true;
         this.passwordHash = passwordHash;
         this.participants = new HashSet<>();
         this.adminPort = adminPort;
@@ -33,6 +33,10 @@ public class ChatRoom {
 
     public String getName() {
         return name;
+    }
+
+    public String getAdmin() {
+        return adminPort;
     }
 
     public boolean isPrivate() {
@@ -44,7 +48,8 @@ public class ChatRoom {
     }
 
     // public boolean checkPassword(String inputPassword) {
-    //     return isPrivate && passwordHash != null && passwordHash.equals(hashPassword(inputPassword));
+    // return isPrivate && passwordHash != null &&
+    // passwordHash.equals(hashPassword(inputPassword));
     // }
 
     public Set<String> getParticipants() {
@@ -58,6 +63,7 @@ public class ChatRoom {
     public void removeParticipant(String username) {
         participants.remove(username);
     }
+
     public String getPasswordHash() {
         return passwordHash;
     }
