@@ -1,4 +1,5 @@
 package model;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -6,27 +7,50 @@ public class ChatRoom {
 
     private String name;
     private boolean isPrivate;
-    private String passwordHash; // Hash da senha para salas privadas
-    private Set<String> participants; // Conjunto de nomes de usuários participantes
+    private String passwordHash;
+    private Set<String> participants;
+    private String adminPort;
 
-    public ChatRoom(String name, boolean isPrivate, String passwordHash) {
+    // Construtor para sala pública (sem senha)
+    public ChatRoom(String name, String adminPort) {
         this.name = name;
-        this.isPrivate = isPrivate;
+        this.isPrivate = false;
+        this.passwordHash = null;
+        this.participants = new HashSet<>();
+        this.adminPort = adminPort;
+        participants.add(adminPort);
+    }
+
+    // Construtor para sala privada (com senha)
+    public ChatRoom(String name, String passwordHash, String adminPort) {
+        this.name = name;
+        this.isPrivate = true;
         this.passwordHash = passwordHash;
         this.participants = new HashSet<>();
+        this.adminPort = adminPort;
+        participants.add(adminPort);
     }
 
     public String getName() {
         return name;
     }
 
+    public String getAdmin() {
+        return adminPort;
+    }
+
     public boolean isPrivate() {
         return isPrivate;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public boolean requiresPassword() {
+        return isPrivate;
     }
+
+    // public boolean checkPassword(String inputPassword) {
+    // return isPrivate && passwordHash != null &&
+    // passwordHash.equals(hashPassword(inputPassword));
+    // }
 
     public Set<String> getParticipants() {
         return participants;
@@ -40,6 +64,10 @@ public class ChatRoom {
         participants.remove(username);
     }
 
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
     @Override
     public String toString() {
         return "ChatRoom{" +
@@ -48,4 +76,5 @@ public class ChatRoom {
                 ", participants=" + participants +
                 '}';
     }
+
 }
