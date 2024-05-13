@@ -122,6 +122,7 @@ public class ChatRoomService {
     }
 
     public void closeChatRoom(int index) {
+        chatRooms.get(index).destroy();
         chatRooms.remove(index);
     }
 

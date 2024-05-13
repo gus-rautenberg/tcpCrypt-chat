@@ -31,6 +31,26 @@ public class ChatRoom {
         participants.add(adminPort);
     }
 
+    public void destroy() {
+        // Limpar recursos ou fazer outras tarefas de liberação aqui
+        this.name = null;
+        this.passwordHash = null;
+        this.participants.clear();
+        this.adminPort = null;
+    }
+
+    // Sobrescrevendo finalize() para invocar o método destroy()
+    // @Override
+    // protected void finalize() throws Throwable {
+    //     try {
+    //         // Chama o método destroy() para liberar recursos
+    //         destroy();
+    //     } finally {
+    //         // Chama finalize() da superclasse para tratamento padrão
+    //         super.finalize();
+    //     }
+    // }
+
     public String getName() {
         return name;
     }
