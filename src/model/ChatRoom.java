@@ -19,6 +19,7 @@ public class ChatRoom {
         this.isPrivate = false;
         this.passwordHash = null;
         this.participants = new HashSet<>();
+        this.bannedUsers = new HashSet<>();
         this.adminPort = adminPort;
         participants.add(adminPort);
     }
@@ -29,6 +30,7 @@ public class ChatRoom {
         this.isPrivate = true;
         this.passwordHash = passwordHash;
         this.participants = new HashSet<>();
+        this.bannedUsers = new HashSet<>();
         this.adminPort = adminPort;
         participants.add(adminPort);
     }
@@ -40,18 +42,6 @@ public class ChatRoom {
         this.participants.clear();
         this.adminPort = null;
     }
-
-    // Sobrescrevendo finalize() para invocar o método destroy()
-    // @Override
-    // protected void finalize() throws Throwable {
-    //     try {
-    //         // Chama o método destroy() para liberar recursos
-    //         destroy();
-    //     } finally {
-    //         // Chama finalize() da superclasse para tratamento padrão
-    //         super.finalize();
-    //     }
-    // }
 
     public String getName() {
         return name;
@@ -69,17 +59,18 @@ public class ChatRoom {
         return isPrivate;
     }
 
-    // public boolean checkPassword(String inputPassword) {
-    // return isPrivate && passwordHash != null &&
-    // passwordHash.equals(hashPassword(inputPassword));
-    // }
-
     public Set<String> getParticipants() {
         return participants;
     }
 
     public void addParticipant(String username) {
         participants.add(username);
+    }
+    public void addBannedUser(String username) {
+        bannedUsers.add(username);
+    }
+    public Set<String> getBannedUsers(){
+        return bannedUsers;
     }
 
     public void removeParticipant(String username) {

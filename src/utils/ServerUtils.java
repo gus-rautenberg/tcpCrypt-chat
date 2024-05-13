@@ -39,4 +39,18 @@ public class ServerUtils {
         return false;
     }
 
+    public void broadcastMessageChat(String messageToSend, String participant, String chatRoom, String remetente) {
+        for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
+            try {
+
+                if(!clientHandler.getClientUsername().equals(remetente) && clientHandler.getClientUsername().equals(participant)){
+                    String finalMessage = "MENSAGEM " + chatRoom + " " + clientHandler.getClientUsername() + ": " + messageToSend;
+                    sendMessageToUniqueClient(finalMessage, clientHandler.getBufferedWriter());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

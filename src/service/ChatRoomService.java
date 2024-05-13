@@ -81,10 +81,22 @@ public class ChatRoomService {
         return false;
     }
 
-    public void banUser(int index, String username) {
-        chatRooms.get(index).removeParticipant(username);
+    public boolean isUserBanned(String username, int index){
+        Set<String> bannedUsers = chatRooms.get(index).getBannedUsers();
+        if(bannedUsers == null) return false;
+        for(String bannedUser : bannedUsers){
+            if(bannedUser.equals(username)){
+                return true;
+            }
+        }
+        return false;
+
     }
 
+    public void banUser(int index, String username) {
+        chatRooms.get(index).removeParticipant(username);
+        chatRooms.get(index).addBannedUser(username);
+    }
     // public boolean chatRoomNameUnique(String roomName){
 
     // for (ChatRoom chatRoom : chatRooms) {
