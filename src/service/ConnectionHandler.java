@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.HashMap;
 import java.security.MessageDigest;
+import service.UserService;
 
 public class ConnectionHandler implements Runnable {
     public static HashMap<ConnectionHandler, String> connHandlers = new HashMap<>(); // talvez tenha que ser sett
@@ -39,8 +40,21 @@ public class ConnectionHandler implements Runnable {
         }
     }
 
+    public String getClientUsername() {
+        return clientUsername;
+    }
+
+    public void setClientUsername(String clientUsername) {
+        this.clientUsername = clientUsername;
+    }
+
+    public Socket getClientSocket() {
+        return clientSocket;
+    }
+
     @Override
     public void run() {
+        UserService userService = new UserService(bufferedWriter, clientSocket);
         while ((clientSocket.isConnected())) {
             try {
                 String messageFromClient;
@@ -49,7 +63,7 @@ public class ConnectionHandler implements Runnable {
                 String messageToSend;
                 switch (words[0]) {
                     case "REGISTRO":
-                        register(words);
+                        userService.register(words, this);
                         break;
                     case "CRIAR_SALA":
                         createRoom(words);
@@ -155,20 +169,6 @@ public class ConnectionHandler implements Runnable {
         }
     }
 
-    public void registerUser(String username) {
-        this.clientUsername = username;
-        connHandlers.put(this, username);
-    }
-
-    public boolean userExists(String username) {
-        for (ConnectionHandler handler : connHandlers.keySet()) {
-            if (handler.clientUsername.equals(username) && username != null) {
-                return true; // Encontrou o usuário
-            }
-        }
-        return false; // Usuário não encontrado
-    }
-
     public void removeClientHandler() {
         connHandlers.remove(this);
         broadcastMessage("SERVER: " + clientUsername + " has left the chat");
@@ -191,41 +191,10 @@ public class ConnectionHandler implements Runnable {
         }
     }
 
-    public boolean userAlreadyRegistered(Socket clientSocket) throws IOException {
-        for (ConnectionHandler clientHandler : connHandlers.keySet()) {
-            if (clientHandler.clientSocket.getRemoteSocketAddress().equals(clientSocket.getRemoteSocketAddress())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void sendMessageToUniqueClient(String message, BufferedWriter bufWriter) throws IOException {
         bufWriter.write(message);
         bufWriter.newLine();
         bufWriter.flush();
-    }
-
-    public void register(String[] words) throws IOException {
-        String messageToSend;
-        if (userExists(words[1])) {
-            System.out.println("User already exists");
-            messageToSend = "ERRO User already exists. Enter a new username";
-            BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-            sendMessageToUniqueClient(messageToSend, bufWriter);
-            return;
-        }
-        if (userAlreadyRegistered(clientSocket)) {
-            System.out.println("User already registered1");
-            messageToSend = "ERRO User already registered.";
-            BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-            sendMessageToUniqueClient(messageToSend, bufWriter);
-            return;
-        }
-        System.out.println("Usuario criado");
-        registerUser(words[1]);
-        messageToSend = "REGISTRO_OK";
-        sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
     }
 
     public void createRoom(String[] words) throws IOException {
