@@ -4,7 +4,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
-import service.ClientHandler;
+import service.ConnectionHandler;
 
 
 public class Server {
@@ -26,9 +26,9 @@ public class Server {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getRemoteSocketAddress());
-                ClientHandler clientHandler = new ClientHandler(clientSocket);
-                Thread threadClientHandler = new Thread(clientHandler);
-                threadClientHandler.start();
+                ConnectionHandler connectionHandler = new ConnectionHandler(clientSocket);
+                Thread threadConnectionHandler = new Thread(connectionHandler);
+                threadConnectionHandler.start();
             }
         } catch (IOException e) {
             System.err.println("Error: " + e);

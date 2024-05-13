@@ -3,12 +3,14 @@ package model;
 import java.util.HashSet;
 import java.util.Set;
 
+
 public class ChatRoom {
 
     private String name;
     private boolean isPrivate;
     private String passwordHash;
     private Set<String> participants;
+    private Set<String> bannedUsers;
     private String adminPort;
 
     // Construtor para sala pública (sem senha)
