@@ -3,12 +3,14 @@ package model;
 import java.util.HashSet;
 import java.util.Set;
 
+
 public class ChatRoom {
 
     private String name;
     private boolean isPrivate;
     private String passwordHash;
     private Set<String> participants;
+    private Set<String> bannedUsers;
     private String adminPort;
 
     // Construtor para sala pública (sem senha)
@@ -17,6 +19,7 @@ public class ChatRoom {
         this.isPrivate = false;
         this.passwordHash = null;
         this.participants = new HashSet<>();
+        this.bannedUsers = new HashSet<>();
         this.adminPort = adminPort;
         participants.add(adminPort);
     }
@@ -27,8 +30,17 @@ public class ChatRoom {
         this.isPrivate = true;
         this.passwordHash = passwordHash;
         this.participants = new HashSet<>();
+        this.bannedUsers = new HashSet<>();
         this.adminPort = adminPort;
         participants.add(adminPort);
+    }
+
+    public void destroy() {
+        // Limpar recursos ou fazer outras tarefas de liberação aqui
+        this.name = null;
+        this.passwordHash = null;
+        this.participants.clear();
+        this.adminPort = null;
     }
 
     public String getName() {
@@ -47,17 +59,18 @@ public class ChatRoom {
         return isPrivate;
     }
 
-    // public boolean checkPassword(String inputPassword) {
-    // return isPrivate && passwordHash != null &&
-    // passwordHash.equals(hashPassword(inputPassword));
-    // }
-
     public Set<String> getParticipants() {
         return participants;
     }
 
     public void addParticipant(String username) {
         participants.add(username);
+    }
+    public void addBannedUser(String username) {
+        bannedUsers.add(username);
+    }
+    public Set<String> getBannedUsers(){
+        return bannedUsers;
     }
 
     public void removeParticipant(String username) {
