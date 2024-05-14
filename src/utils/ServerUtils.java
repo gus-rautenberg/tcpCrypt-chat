@@ -52,5 +52,16 @@ public class ServerUtils {
             }
         }
     }
+    public void broadcastJoinChat(String messageToSend, String participant, String chatRoom, String remetente) {
+        for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
+            try {
 
+                if(!clientHandler.getClientUsername().equals(remetente) && clientHandler.getClientUsername().equals(participant)){
+                    sendMessageToUniqueClient(messageToSend, clientHandler.getBufferedWriter());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 }

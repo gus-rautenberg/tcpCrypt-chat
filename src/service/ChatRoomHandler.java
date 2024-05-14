@@ -4,7 +4,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Set;
+import model.ChatRoom;
 
 import utils.ServerUtils;
 
@@ -25,7 +27,7 @@ public class ChatRoomHandler {
         String messageToSend;
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
             return;
@@ -34,7 +36,7 @@ public class ChatRoomHandler {
 
         if(!chatRoomService.chatRoomNameExists(words[1])){  
             System.out.println("Chat Room does not exist or tipped wrong name");
-            messageToSend = "Chat Room does not exist or tipped wrong name";
+            messageToSend = "ERRO Chat Room does not exist or tipped wrong name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             return;
         }
@@ -47,7 +49,7 @@ public class ChatRoomHandler {
         chat_participants = chatRoomService.showParticipants(index);
         if(!chat_participants.contains(connectionHandler.getClientUsername())){
             System.out.println("The user does not belong to the room");
-            messageToSend = "The user does not belong to the room";
+            messageToSend = "ERRO The user does not belong to the room";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             return;
         }
@@ -77,7 +79,7 @@ public class ChatRoomHandler {
 
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
             return;
@@ -85,20 +87,23 @@ public class ChatRoomHandler {
 
         if (chatRoomService.chatRoomNameExists(words[2])) {
             System.out.println("Chat Room Name already exists");
-            messageToSend = "Chat Room Name already exists. Enter a new name";
+            messageToSend = "ERRO Chat Room Name already exists. Enter a new name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             System.out.println("ChatRooms :" + chatRoomService.getAllChatRooms());
             return;
         }
-
+        messageToSend = "CRIAR_SALA_OK";
         if (words[1].equals("PUBLICA")) {
 
             chatRoomService.createPublicChatRoom(words[2], connectionHandler.getClientUsername());
             System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
+            
+            serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
         } else {
             chatRoomService.createPrivateChatRoom(words[2], words[3], connectionHandler.getClientUsername());
             System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
+            serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
         }
     }
 
@@ -107,16 +112,24 @@ public class ChatRoomHandler {
 
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
 
             return;
         }
+        if(chatRoomService.getAllChatRooms().isEmpty()){
+            System.out.println("No chat rooms");
+            messageToSend = "ERRO No chat rooms";
+            BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
+        }
 
-        messageToSend = chatRoomService.getAllChatRooms().toString(); // arrumar print
-
-        serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
+        for (ChatRoom chatRoom : chatRoomService.getAllChatRooms()) {
+            messageToSend = "NOME: " + chatRoom.getName() +  " Privada:" + chatRoom.isPrivate(); // arrumar print
+            serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
+        }
+        
     }
 
     public void joinChatRoom(String[] words, ConnectionHandler connectionHandler) throws IOException {
@@ -124,7 +137,7 @@ public class ChatRoomHandler {
         
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
 
@@ -134,7 +147,7 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.chatRoomNameExists(words[1])) {
             System.out.println("Chat Room does not exist or tipped wrong name");
-            messageToSend = "Chat Room does not exist or tipped wrong name";
+            messageToSend = "ERRO Chat Room does not exist or tipped wrong name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             return;
         }
@@ -152,7 +165,7 @@ public class ChatRoomHandler {
 
         if (chatRoomService.checkUserInChatRoom(connectionHandler.getClientUsername(), index)) {
             System.out.println("Client already in this Room");
-            messageToSend = "You are already in this room";
+            messageToSend = "ERRO You are already in this room";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             return;
         }
@@ -161,14 +174,24 @@ public class ChatRoomHandler {
         if (chatRoomService.requiresPassword(index)
                 && !chatRoomService.comparePassword(index, words[2])) {
             System.out.println("Wrong password");
-            messageToSend = "Wrong password";
+            messageToSend = "ERRO Wrong password";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
             return;
         }
-
         chatRoomService.joinChatRoom(index, connectionHandler.getClientUsername());
         System.out.println("Chat Room Joined: " + chatRoomService.showParticipants(index));
+        messageToSend = "ENTRAR_SALA_OK " + words[1] + " " + chatRoomService.showParticipants(index);
+        serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
+        messageToSend = "ENTROU " + words[1] + " " + connectionHandler.getClientUsername();
+        
+        Set<String> chat_participants;
+        chat_participants = chatRoomService.showParticipants(index);
+
+        for(String participant : chat_participants){
+            System.out.println(participant);
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
+        }
     }
 
     public void leaveChatRoom(String[] words, ConnectionHandler connectionHandler) throws IOException {
@@ -176,7 +199,7 @@ public class ChatRoomHandler {
 
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
 
@@ -185,7 +208,7 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.chatRoomNameExists(words[1])) {
             System.out.println("Chat Room does not exist or tipped wrong name");
-            messageToSend = "Chat Room does not exist or tipped wrong name";
+            messageToSend = "ERRO Chat Room does not exist or tipped wrong name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
             return;
@@ -195,7 +218,7 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.checkUserInChatRoom(connectionHandler.getClientUsername(), index)) {
             System.out.println("Client is not a member in this Room");
-            messageToSend = "You're not a member in this Room";
+            messageToSend = "ERRO You're not a member in this Room";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             return;
         }
@@ -203,6 +226,17 @@ public class ChatRoomHandler {
         chatRoomService.leaveChatRoom(index, connectionHandler.getClientUsername());
 
         System.out.println("Chat Room Participants: " + chatRoomService.showParticipants(index));
+        messageToSend = "SAIR_SALA_OK " + words[1];
+        serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
+        messageToSend = "SAIU " + words[1] + " " + connectionHandler.getClientUsername();
+        
+        Set<String> chat_participants;
+        chat_participants = chatRoomService.showParticipants(index);
+
+        for(String participant : chat_participants){
+            System.out.println(participant);
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
+        }
     }
 
     public void deleteChatRoom(String[] words, ConnectionHandler connectionHandler) throws IOException {
@@ -210,7 +244,7 @@ public class ChatRoomHandler {
 
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
 
@@ -219,7 +253,7 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.chatRoomNameExists(words[1])) {
             System.out.println("Chat Room does not exist or tipped wrong name");
-            messageToSend = "Chat Room does not exist or tipped wrong name";
+            messageToSend = "ERRO Chat Room does not exist or tipped wrong name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
             return;
@@ -231,11 +265,21 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.checkAdminInChatRoom(connectionHandler.getClientUsername(), index)) {
             System.out.println("Client is not an administrator in this Room");
-            messageToSend = "You're not an administrator in this Room";
+            messageToSend = "ERRO You're not an administrator in this Room";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
             return;
         }
+        messageToSend = "FECHAR_SALA_OK " + words[1];
+        serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
+        messageToSend = "SALA_FECHADA " + words[1];
+        
+        Set<String> chat_participants;
+        chat_participants = chatRoomService.showParticipants(index);
 
+        for(String participant : chat_participants){
+            System.out.println(participant);
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
+        }
         chatRoomService.closeChatRoom(index);
     }
 
@@ -244,7 +288,7 @@ public class ChatRoomHandler {
 
         if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
             System.out.println("User does not exists");
-            messageToSend = "ERRO User does not exists. Register modafoca";
+            messageToSend = "ERRO User does not exists. Register please.";
             BufferedWriter bufWriter = new BufferedWriter(
             new OutputStreamWriter(clientSocket.getOutputStream()));
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
@@ -254,7 +298,7 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.chatRoomNameExists(words[1])) {
             System.out.println("Chat Room does not exist or tipped wrong name");
-            messageToSend = "Chat Room does not exist or tipped wrong name";
+            messageToSend = "ERRO Chat Room does not exist or tipped wrong name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
             return;
@@ -264,7 +308,7 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.checkAdminInChatRoom(connectionHandler.getClientUsername(), index)) {
             System.out.println("Client is not an administrator in this Room");
-            messageToSend = "You're not an administrator in this Room";
+            messageToSend = "ERRO You're not an administrator in this Room";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
             return;
@@ -272,12 +316,34 @@ public class ChatRoomHandler {
 
         if (!chatRoomService.checkUserInChatRoom(words[2], index)) {
             System.out.println("User does not exist or tipped wrong name");
-            messageToSend = "User does not exist or tipped wrong name";
+            messageToSend = "ERRO User does not exist or tipped wrong name";
             serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
 
             return;
         }
-
         chatRoomService.banUser(index, words[2]);
+        messageToSend = "BANIDO_DA_SALA " + words[1];
+        BufferedWriter auxBuffer = null;
+        // HashMap<ConnectionHandler, String> connHandlers = connectionHandler.getConnHandlers();
+        for (ConnectionHandler handler : connectionHandler.getConnHandlers().keySet()) {
+            if (handler.getClientUsername().equals(words[2])) {
+                auxBuffer = handler.getBufferedWriter();
+            }
+        }
+
+        serverUtils.sendMessageToUniqueClient(messageToSend, auxBuffer);
+
+        messageToSend = "BANIMENTO_OK " + words[2];
+        serverUtils.sendMessageToUniqueClient(messageToSend, this.bufferedWriter);
+
+        messageToSend = "SAIU " + words[1] + " " + words[2];
+        
+        Set<String> chat_participants;
+        chat_participants = chatRoomService.showParticipants(index);
+
+        for(String participant : chat_participants){
+            System.out.println(participant);
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
+        }
     }
 }
