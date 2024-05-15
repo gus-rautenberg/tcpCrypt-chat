@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import service.ConnectionHandler;
+import service.AuthenticationService;
 
 public class ServerUtils {
     private BufferedWriter bufferedWriter;
@@ -39,13 +40,13 @@ public class ServerUtils {
         return false;
     }
 
-    public void broadcastMessageChat(String messageToSend, String participant, String chatRoom, String remetente) {
+    public void broadcastMessageChat(String messageToSend, String participant, String chatRoom, String remetente, AuthenticationService authHandler) {
         for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
             try {
 
                 if(!clientHandler.getClientUsername().equals(remetente) && clientHandler.getClientUsername().equals(participant)){
                     String finalMessage = "MENSAGEM " + chatRoom + " " + clientHandler.getClientUsername() + ": " + messageToSend;
-                    sendMessageToUniqueClient(finalMessage, clientHandler.getBufferedWriter());
+                    sendMessageToUniqueClient(authHandler.encryptMessage(finalMessage), clientHandler.getBufferedWriter());
                 }
             } catch (IOException e) {
                 e.printStackTrace();

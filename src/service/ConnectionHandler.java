@@ -15,12 +15,14 @@ import java.util.Set;
 import java.util.HashMap;
 import java.security.MessageDigest;
 import service.UserService;
+import service.AuthenticationService;
 
 public class ConnectionHandler implements Runnable {
     public static HashMap<ConnectionHandler, String> connHandlers = new HashMap<>(); // talvez tenha que ser sett
     private Socket clientSocket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    public boolean crypto = false;
     // private BufferedInputStream;
     private String clientUsername;
     // private ChatRoomService chatRoomService;
@@ -63,42 +65,61 @@ public class ConnectionHandler implements Runnable {
     public void run() {
         UserService userService = new UserService(bufferedWriter, clientSocket);
         ChatRoomHandler chatRoomHandler = new ChatRoomHandler(bufferedWriter, clientSocket);
+        AuthenticationService authHandler = new AuthenticationService(bufferedWriter, clientSocket);
         while ((clientSocket.isConnected())) {
             try {
                 String messageFromClient;
                 messageFromClient = bufferedReader.readLine();
-                String[] words = messageFromClient.split(" ");
+                try {
+                    if(crypto) {
+                        System.out.println("Agora ta criptografado");
+                        messageFromClient = authHandler.decryptMessageFromClient(messageFromClient);
+                    }
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } 
+                    String[] words = messageFromClient.split(" ");
+                
                 switch (words[0]) {
                     case "REGISTRO":
                         userService.register(words, this);
                         break;
+                    case "AUTENTICACAO":    
+                        authHandler.sendPublicKeyToClient();
+                        break;
+                    case "CHAVE_SIMETRICA":
+                        System.out.println("CHAVE_SIMETRICA: " + words[1]);
+                        authHandler.decryptSimetricKey(words[1]);
+                        crypto = true;
+                        break;
                         
                     case "CRIAR_SALA":
-                        chatRoomHandler.createRoom(words, this);
+                        chatRoomHandler.createRoom(words, this, authHandler);
                         break;
 
                     case "LISTAR_SALAS":
-                        chatRoomHandler.listAllChatRooms(words, this);
+                        chatRoomHandler.listAllChatRooms(words, this, authHandler);
                         break;
 
                     case "ENTRAR_SALA":
-                        chatRoomHandler.joinChatRoom(words, this);
+                        chatRoomHandler.joinChatRoom(words, this, authHandler);
                         break;
 
                     case "SAIR_SALA":
-                        chatRoomHandler.leaveChatRoom(words, this);
+                        chatRoomHandler.leaveChatRoom(words, this, authHandler);
                         break;
 
                     case "ENVIAR_MENSAGEM":
-                        chatRoomHandler.sendMessage(words, this);
+                        chatRoomHandler.sendMessage(words, this, authHandler);
                         break;
 
                     case "FECHAR_SALA":
-                        chatRoomHandler.deleteChatRoom(words, this);
+                        chatRoomHandler.deleteChatRoom(words, this, authHandler);
                         break;
 
                     case "BANIR_USUARIO":
-                        chatRoomHandler.banUser(words, this);
+                        chatRoomHandler.banUser(words, this, authHandler);
                         break;
 
                     default:
