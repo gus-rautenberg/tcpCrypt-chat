@@ -40,13 +40,13 @@ public class ServerUtils {
         return false;
     }
 
-    public void broadcastMessageChat(String messageToSend, String participant, String chatRoom, String remetente, AuthenticationService authHandler) {
+    public void broadcastMessageChat(String messageToSend, String participant, String chatRoom, String remetente) {
         for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
             try {
 
                 if(!clientHandler.getClientUsername().equals(remetente) && clientHandler.getClientUsername().equals(participant)){
-                    String finalMessage = "MENSAGEM " + chatRoom + " " + clientHandler.getClientUsername() + ": " + messageToSend;
-                    sendMessageToUniqueClient(authHandler.encryptMessage(finalMessage), clientHandler.getBufferedWriter());
+                    String finalMessage = "MENSAGEM " + chatRoom + " " + remetente + ": " + messageToSend;
+                    sendMessageToUniqueClient(clientHandler.gAuthenticationService().encryptMessage(finalMessage), clientHandler.getBufferedWriter());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -58,7 +58,20 @@ public class ServerUtils {
             try {
 
                 if(!clientHandler.getClientUsername().equals(remetente) && clientHandler.getClientUsername().equals(participant)){
-                    sendMessageToUniqueClient(messageToSend, clientHandler.getBufferedWriter());
+                    sendMessageToUniqueClient(clientHandler.gAuthenticationService().encryptMessage(messageToSend), clientHandler.getBufferedWriter());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void broadcastBanUser(String messageToSend, String participant, String chatRoom, String remetente, String userBanned) {
+        for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
+            try {
+
+                if(!clientHandler.getClientUsername().equals(userBanned) && clientHandler.getClientUsername().equals(participant)){
+                    sendMessageToUniqueClient(clientHandler.gAuthenticationService().encryptMessage(messageToSend), clientHandler.getBufferedWriter());
                 }
             } catch (IOException e) {
                 e.printStackTrace();

@@ -22,6 +22,7 @@ public class ConnectionHandler implements Runnable {
     private Socket clientSocket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    public AuthenticationService authHandler;
     public boolean crypto = false;
     // private BufferedInputStream;
     private String clientUsername;
@@ -37,6 +38,7 @@ public class ConnectionHandler implements Runnable {
             // broadcastMessage("SERVER: " + clientUsername + " has entered the chat");
 
             // this.chatRoomService = ChatRoomService.getInstance();
+            authHandler = new AuthenticationService(this.bufferedWriter, clientSocket);
         } catch (IOException e) {
             closeEverything(clientSocket, bufferedReader, bufferedWriter);
         }
@@ -44,6 +46,10 @@ public class ConnectionHandler implements Runnable {
 
     public String getClientUsername() {
         return clientUsername;
+    }
+
+    public AuthenticationService gAuthenticationService() {
+        return authHandler;
     }
 
     public void setClientUsername(String clientUsername) {
@@ -65,7 +71,6 @@ public class ConnectionHandler implements Runnable {
     public void run() {
         UserService userService = new UserService(bufferedWriter, clientSocket);
         ChatRoomHandler chatRoomHandler = new ChatRoomHandler(bufferedWriter, clientSocket);
-        AuthenticationService authHandler = new AuthenticationService(bufferedWriter, clientSocket);
         while ((clientSocket.isConnected())) {
             try {
                 String messageFromClient;

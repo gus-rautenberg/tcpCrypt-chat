@@ -59,7 +59,7 @@ public class ChatRoomHandler {
         }
         for(String participant : chat_participants){
             System.out.println(participant);
-            serverUtils.broadcastMessageChat(entireMessage, participant, words[1], remetente, authHandler); 
+            serverUtils.broadcastMessageChat(entireMessage, participant, words[1], remetente); 
         }
 
 
@@ -190,7 +190,7 @@ public class ChatRoomHandler {
 
         for(String participant : chat_participants){
             System.out.println(participant);
-            serverUtils.broadcastJoinChat(authHandler.encryptMessage(messageToSend), participant, words[1], connectionHandler.getClientUsername()); 
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
         }
     }
 
@@ -235,7 +235,7 @@ public class ChatRoomHandler {
 
         for(String participant : chat_participants){
             System.out.println(participant);
-            serverUtils.broadcastJoinChat(authHandler.encryptMessage(messageToSend), participant, words[1], connectionHandler.getClientUsername()); 
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
         }
     }
 
@@ -330,7 +330,6 @@ public class ChatRoomHandler {
                 auxBuffer = handler.getBufferedWriter();
             }
         }
-
         serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), auxBuffer);
 
         messageToSend = "BANIMENTO_OK " + words[2];
@@ -340,10 +339,10 @@ public class ChatRoomHandler {
         
         Set<String> chat_participants;
         chat_participants = chatRoomService.showParticipants(index);
-
+        System.out.println("messageToSend: " + messageToSend);
         for(String participant : chat_participants){
             System.out.println(participant);
-            serverUtils.broadcastJoinChat(authHandler.encryptMessage(messageToSend), participant, words[1], connectionHandler.getClientUsername()); 
+            serverUtils.broadcastBanUser(messageToSend, participant, words[1], connectionHandler.getClientUsername(), words[2]); 
         }
     }
 }

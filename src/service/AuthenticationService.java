@@ -75,6 +75,7 @@ public class AuthenticationService {
             cipher.init(Cipher.DECRYPT_MODE, aesKey); // aesKey é a chave AES criada pelo servidor
             byte[] decryptedMessageBytes = cipher.doFinal(messageBytes);
             String decryptedMessage = new String(decryptedMessageBytes);
+            System.out.println("Decrypted message: " + decryptedMessage);
             return decryptedMessage;
         } catch (Exception e) {
             e.printStackTrace();
