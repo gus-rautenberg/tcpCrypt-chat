@@ -15,12 +15,16 @@ import java.util.Set;
 import java.util.HashMap;
 import java.security.MessageDigest;
 import service.UserService;
+import utils.ServerUtils;
+import service.AuthenticationService;
 
 public class ConnectionHandler implements Runnable {
     public static HashMap<ConnectionHandler, String> connHandlers = new HashMap<>(); // talvez tenha que ser sett
     private Socket clientSocket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+    public AuthenticationService authHandler;
+    public boolean crypto = false;
     // private BufferedInputStream;
     private String clientUsername;
     // private ChatRoomService chatRoomService;
@@ -35,13 +39,18 @@ public class ConnectionHandler implements Runnable {
             // broadcastMessage("SERVER: " + clientUsername + " has entered the chat");
 
             // this.chatRoomService = ChatRoomService.getInstance();
+            authHandler = new AuthenticationService(this.bufferedWriter, clientSocket);
         } catch (IOException e) {
-            closeEverything(clientSocket, bufferedReader, bufferedWriter);
+            closeEverything();
         }
     }
 
     public String getClientUsername() {
         return clientUsername;
+    }
+
+    public AuthenticationService gAuthenticationService() {
+        return authHandler;
     }
 
     public void setClientUsername(String clientUsername) {
@@ -67,38 +76,56 @@ public class ConnectionHandler implements Runnable {
             try {
                 String messageFromClient;
                 messageFromClient = bufferedReader.readLine();
-                String[] words = messageFromClient.split(" ");
+                try {
+                    if(crypto) {
+                        System.out.println("Agora ta criptografado");
+                        messageFromClient = authHandler.decryptMessageFromClient(messageFromClient);
+                    }
+                    
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } 
+                    String[] words = messageFromClient.split(" ");
+                
                 switch (words[0]) {
                     case "REGISTRO":
-                        userService.register(words, this);
+                        userService.register(words, this, authHandler);
+                        break;
+                    case "AUTENTICACAO":    
+                        authHandler.sendPublicKeyToClient();
+                        break;
+                    case "CHAVE_SIMETRICA":
+                        // System.out.println("CHAVE_SIMETRICA: " + words[1]);
+                        authHandler.decryptSimetricKey(words[1]);
+                        crypto = true;
                         break;
                         
                     case "CRIAR_SALA":
-                        chatRoomHandler.createRoom(words, this);
+                        chatRoomHandler.createRoom(words, this, authHandler);
                         break;
 
                     case "LISTAR_SALAS":
-                        chatRoomHandler.listAllChatRooms(words, this);
+                        chatRoomHandler.listAllChatRooms(words, this, authHandler);
                         break;
 
                     case "ENTRAR_SALA":
-                        chatRoomHandler.joinChatRoom(words, this);
+                        chatRoomHandler.joinChatRoom(words, this, authHandler);
                         break;
 
                     case "SAIR_SALA":
-                        chatRoomHandler.leaveChatRoom(words, this);
+                        chatRoomHandler.leaveChatRoom(words, this, authHandler);
                         break;
 
                     case "ENVIAR_MENSAGEM":
-                        chatRoomHandler.sendMessage(words, this);
+                        chatRoomHandler.sendMessage(words, this, authHandler);
                         break;
 
                     case "FECHAR_SALA":
-                        chatRoomHandler.deleteChatRoom(words, this);
+                        chatRoomHandler.deleteChatRoom(words, this, authHandler);
                         break;
 
                     case "BANIR_USUARIO":
-                        chatRoomHandler.banUser(words, this);
+                        chatRoomHandler.banUser(words, this, authHandler);
                         break;
 
                     default:
@@ -106,28 +133,34 @@ public class ConnectionHandler implements Runnable {
                         break;
                 }
                 // broadcastMessage(messageFromClient);
-            } catch (IOException e) {
-                closeEverything(clientSocket, bufferedReader, bufferedWriter);
+            } catch (IOException ignorException) {
+                closeEverything();
                 break;
             }
         }
     }
 
 
-    public void closeEverything(Socket clientSocket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+    public void closeEverything() {
         // removeClientHandler();
+        // ServerUtils utils = new ServerUtils(bufferedWriter);
+        // utils.broadcastMessageEveryone();
         try {
-            if (bufferedReader != null) {
-                bufferedReader.close();
+            ChatRoomHandler chatRoomHandler = new ChatRoomHandler(this.bufferedWriter, this.clientSocket);
+
+            chatRoomHandler.removeClientFromAllRooms(this);
+            ConnectionHandler.connHandlers.remove(this);
+            if (this.bufferedReader != null) {
+                this.bufferedReader.close();
             }
-            if (bufferedWriter != null) {
-                bufferedWriter.close();
+            if (this.bufferedWriter != null) {
+                this.bufferedWriter.close();
             }
-            if (clientSocket != null) {
-                clientSocket.close();
+            if (this.clientSocket != null) {
+                this.clientSocket.close();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignorException) {
+            
         }
     }
 
