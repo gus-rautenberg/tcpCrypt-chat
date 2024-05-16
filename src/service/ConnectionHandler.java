@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.security.MessageDigest;
 import service.UserService;
+import utils.ServerUtils;
 import service.AuthenticationService;
 
 public class ConnectionHandler implements Runnable {
@@ -88,7 +89,7 @@ public class ConnectionHandler implements Runnable {
                 
                 switch (words[0]) {
                     case "REGISTRO":
-                        userService.register(words, this);
+                        userService.register(words, this, authHandler);
                         break;
                     case "AUTENTICACAO":    
                         authHandler.sendPublicKeyToClient();
@@ -142,7 +143,10 @@ public class ConnectionHandler implements Runnable {
 
     public void closeEverything(Socket clientSocket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
         // removeClientHandler();
+        ServerUtils utils = new ServerUtils(bufferedWriter);
+        utils.broadcastMessageEveryone();
         try {
+            ConnectionHandler.connHandlers.remove(this);
             if (bufferedReader != null) {
                 bufferedReader.close();
             }

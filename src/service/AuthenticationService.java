@@ -43,10 +43,10 @@ public class AuthenticationService {
 
     public void sendPublicKeyToClient() throws IOException{
         byte[] msgEncriptada = this.publicKey.getEncoded();
-        System.out.println("Chave publica antes da base: " + msgEncriptada);
+        // System.out.println("Chave publica antes da base: " + msgEncriptada);
         String messageToSend = "CHAVE_PUBLICA " + Base64.getEncoder().encodeToString(msgEncriptada);
         BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-        System.out.println("Sending public key to client:" + messageToSend);
+        // System.out.println("Sending public key to client:" + messageToSend);
         serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
     }
 
@@ -60,7 +60,7 @@ public class AuthenticationService {
             // Reconstruir a chave AES
             this.aesKey = new SecretKeySpec(aesKeyBytes, "AES");
             byte[] chave = this.aesKey.getEncoded();
-            System.out.println("Chave AES: " + chave);
+            // System.out.println("Chave AES: " + chave);
 
         }catch(Exception e) {
             e.printStackTrace();
@@ -75,7 +75,7 @@ public class AuthenticationService {
             cipher.init(Cipher.DECRYPT_MODE, aesKey); // aesKey é a chave AES criada pelo servidor
             byte[] decryptedMessageBytes = cipher.doFinal(messageBytes);
             String decryptedMessage = new String(decryptedMessageBytes);
-            System.out.println("Decrypted message: " + decryptedMessage);
+            // System.out.println("Decrypted message: " + decryptedMessage);
             return decryptedMessage;
         } catch (Exception e) {
             e.printStackTrace();

@@ -89,20 +89,20 @@ public class ChatRoomHandler {
             System.out.println("Chat Room Name already exists");
             messageToSend = "ERRO Chat Room Name already exists. Enter a new name";
             serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
-            System.out.println("ChatRooms :" + chatRoomService.getAllChatRooms());
+            // System.out.println("ChatRooms :" + chatRoomService.getAllChatRooms());
             return;
         }
         messageToSend = "CRIAR_SALA_OK";
         if (words[1].equals("PUBLICA")) {
 
             chatRoomService.createPublicChatRoom(words[2], connectionHandler.getClientUsername());
-            System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
+            // System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
             
             serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
 
         } else {
             chatRoomService.createPrivateChatRoom(words[2], words[3], connectionHandler.getClientUsername());
-            System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
+            // System.out.println("Chat Room Created :" + chatRoomService.getAllChatRooms());
             serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
         }
     }
@@ -180,7 +180,7 @@ public class ChatRoomHandler {
             return;
         }
         chatRoomService.joinChatRoom(index, connectionHandler.getClientUsername());
-        System.out.println("Chat Room Joined: " + chatRoomService.showParticipants(index));
+        // System.out.println("Chat Room Joined: " + chatRoomService.showParticipants(index));
         messageToSend = "ENTRAR_SALA_OK " + words[1] + " " + chatRoomService.showParticipants(index);
         serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
         messageToSend = "ENTROU " + words[1] + " " + connectionHandler.getClientUsername();
@@ -261,7 +261,7 @@ public class ChatRoomHandler {
 
         int index = chatRoomService.getChatRoomIndexByName(words[1]);
 
-        System.out.println("Client Username: " + connectionHandler.getClientUsername());
+        // System.out.println("Client Username: " + connectionHandler.getClientUsername());
 
         if (!chatRoomService.checkAdminInChatRoom(connectionHandler.getClientUsername(), index)) {
             System.out.println("Client is not an administrator in this Room");
@@ -334,10 +334,10 @@ public class ChatRoomHandler {
         }
         //messageToSend = "Teste antes do Banido";        
         //serverUtils.sendMessageToUniqueClient(auxHandler.encryptMessage(messageToSend), auxBuffer);
-        System.out.println("AuxHandler " + auxHandler);
+        // System.out.println("AuxHandler " + auxHandler);
         messageToSend = "BANIDO_DA_SALA " + words[1];
         serverUtils.sendMessageToUniqueClient(auxHandler.encryptMessage(messageToSend), auxBuffer);
-        System.out.println("AuthHandler " + authHandler);
+        // System.out.println("AuthHandler " + authHandler);
         //System.out.println("messageToSend: " + messageToSend);
         //System.out.println("Auxbuffer" + auxBuffer);
        

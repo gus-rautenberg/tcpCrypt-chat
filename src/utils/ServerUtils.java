@@ -40,6 +40,19 @@ public class ServerUtils {
         return false;
     }
 
+    
+    public void broadcastMessageEveryone() {
+        for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
+            try {
+                String finalMessage = "SERVER CLOSED ";
+                sendMessageToUniqueClient(clientHandler.gAuthenticationService().encryptMessage(finalMessage), clientHandler.getBufferedWriter());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void broadcastMessageChat(String messageToSend, String participant, String chatRoom, String remetente) {
         for(ConnectionHandler clientHandler : ConnectionHandler.connHandlers.keySet()) {
             try {
