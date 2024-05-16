@@ -58,7 +58,6 @@ public class ChatRoomHandler {
             entireMessage += words[i] + " ";
         }
         for(String participant : chat_participants){
-            System.out.println(participant);
             serverUtils.broadcastMessageChat(entireMessage, participant, words[1], remetente); 
         }
 
@@ -132,6 +131,47 @@ public class ChatRoomHandler {
         
     }
 
+    public void removeClientFromAllRooms(ConnectionHandler connectionHandler) throws IOException{
+        String messageToSend;
+
+        if (!serverUtils.userExists(connectionHandler.getClientUsername())) {
+            System.out.println("User does not exists");
+            messageToSend = "ERRO User does not exists. Register please.";
+            BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
+
+            return;
+        }
+
+        for (ChatRoom chatRoom : chatRoomService.getAllChatRooms()) {
+            int index = chatRoomService.getChatRoomIndexByName(chatRoom.getName());
+            if(!chatRoomService.checkChatRoomsEmpty()){
+                if (chatRoomService.checkUserInChatRoom(connectionHandler.getClientUsername(), index)) {
+                    chatRoom.removeParticipant(connectionHandler.getClientUsername());
+                    messageToSend = "SAIU " + chatRoom.getName() + " " + connectionHandler.getClientUsername();
+            
+                    Set<String> chat_participants;
+                    chat_participants = chatRoomService.showParticipants(index);
+            
+                    for(String participant : chat_participants){
+                        serverUtils.broadcastJoinChat(messageToSend, participant, chatRoom.getName(), connectionHandler.getClientUsername()); 
+                    }
+                }
+            }
+            if(chatRoomService.checkAdminInChatRoom(connectionHandler.getClientUsername(), index)) {
+                Set<String> chat_participants;
+                chat_participants = chatRoomService.showParticipants(index);
+                messageToSend = "SALA_FECHADA " + chatRoom.getName();
+                for(String participant : chat_participants){
+                    serverUtils.broadcastJoinChat(messageToSend, participant, chatRoom.getName(), connectionHandler.getClientUsername()); 
+                }
+                chatRoomService.closeChatRoom(index);
+                
+            }
+        }
+
+    }
+
     public void joinChatRoom(String[] words, ConnectionHandler connectionHandler, AuthenticationService authHandler) throws IOException {
         String messageToSend;
         
@@ -189,7 +229,6 @@ public class ChatRoomHandler {
         chat_participants = chatRoomService.showParticipants(index);
 
         for(String participant : chat_participants){
-            System.out.println(participant);
             serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
         }
     }
@@ -234,7 +273,6 @@ public class ChatRoomHandler {
         chat_participants = chatRoomService.showParticipants(index);
 
         for(String participant : chat_participants){
-            System.out.println(participant);
             serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
         }
     }
@@ -277,8 +315,8 @@ public class ChatRoomHandler {
         chat_participants = chatRoomService.showParticipants(index);
 
         for(String participant : chat_participants){
-            System.out.println(participant);
-            serverUtils.broadcastJoinChat(authHandler.encryptMessage(messageToSend), participant, words[1], connectionHandler.getClientUsername()); 
+
+            serverUtils.broadcastJoinChat(messageToSend, participant, words[1], connectionHandler.getClientUsername()); 
         }
         chatRoomService.closeChatRoom(index);
     }
@@ -352,7 +390,6 @@ public class ChatRoomHandler {
         chat_participants = chatRoomService.showParticipants(index);
         //System.out.println("messageToSend: " + messageToSend);
         for(String participant : chat_participants){
-            System.out.println(participant);
             serverUtils.broadcastBanUser(messageToSend, participant, words[1], connectionHandler.getClientUsername(), words[2]); 
         }
     }

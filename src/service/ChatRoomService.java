@@ -25,6 +25,14 @@ public class ChatRoomService {
         return new ArrayList<>(chatRooms);
     }
 
+    public boolean checkChatRoomsEmpty() {
+        return chatRooms.isEmpty();
+    }
+
+    public ChatRoom geChatRoomByIndex(int index) {
+        return chatRooms.get(index);
+    }
+
     public void createPublicChatRoom(String roomName, String admin) {
         // Lógica para criar uma sala de chat pública
         chatRooms.add(new ChatRoom(roomName, admin));

@@ -31,6 +31,7 @@ public class Server {
                 threadConnectionHandler.start();
             }
         } catch (IOException e) {
+            
             System.err.println("Error: " + e);
         }
     }

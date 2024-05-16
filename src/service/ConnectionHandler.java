@@ -41,7 +41,7 @@ public class ConnectionHandler implements Runnable {
             // this.chatRoomService = ChatRoomService.getInstance();
             authHandler = new AuthenticationService(this.bufferedWriter, clientSocket);
         } catch (IOException e) {
-            closeEverything(clientSocket, bufferedReader, bufferedWriter);
+            closeEverything();
         }
     }
 
@@ -95,7 +95,7 @@ public class ConnectionHandler implements Runnable {
                         authHandler.sendPublicKeyToClient();
                         break;
                     case "CHAVE_SIMETRICA":
-                        System.out.println("CHAVE_SIMETRICA: " + words[1]);
+                        // System.out.println("CHAVE_SIMETRICA: " + words[1]);
                         authHandler.decryptSimetricKey(words[1]);
                         crypto = true;
                         break;
@@ -133,31 +133,34 @@ public class ConnectionHandler implements Runnable {
                         break;
                 }
                 // broadcastMessage(messageFromClient);
-            } catch (IOException e) {
-                closeEverything(clientSocket, bufferedReader, bufferedWriter);
+            } catch (IOException ignorException) {
+                closeEverything();
                 break;
             }
         }
     }
 
 
-    public void closeEverything(Socket clientSocket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+    public void closeEverything() {
         // removeClientHandler();
-        ServerUtils utils = new ServerUtils(bufferedWriter);
-        utils.broadcastMessageEveryone();
+        // ServerUtils utils = new ServerUtils(bufferedWriter);
+        // utils.broadcastMessageEveryone();
         try {
+            ChatRoomHandler chatRoomHandler = new ChatRoomHandler(this.bufferedWriter, this.clientSocket);
+
+            chatRoomHandler.removeClientFromAllRooms(this);
             ConnectionHandler.connHandlers.remove(this);
-            if (bufferedReader != null) {
-                bufferedReader.close();
+            if (this.bufferedReader != null) {
+                this.bufferedReader.close();
             }
-            if (bufferedWriter != null) {
-                bufferedWriter.close();
+            if (this.bufferedWriter != null) {
+                this.bufferedWriter.close();
             }
-            if (clientSocket != null) {
-                clientSocket.close();
+            if (this.clientSocket != null) {
+                this.clientSocket.close();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignorException) {
+            
         }
     }
 
