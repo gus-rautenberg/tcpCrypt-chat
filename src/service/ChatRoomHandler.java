@@ -321,25 +321,36 @@ public class ChatRoomHandler {
 
             return;
         }
-        chatRoomService.banUser(index, words[2]);
-        messageToSend = "BANIDO_DA_SALA " + words[1];
+        
         BufferedWriter auxBuffer = null;
+        AuthenticationService auxHandler = null;
+        chatRoomService.banUser(index, words[2]);
         // HashMap<ConnectionHandler, String> connHandlers = connectionHandler.getConnHandlers();
         for (ConnectionHandler handler : connectionHandler.getConnHandlers().keySet()) {
             if (handler.getClientUsername().equals(words[2])) {
                 auxBuffer = handler.getBufferedWriter();
+                auxHandler = handler.gAuthenticationService(); 
             }
         }
-        serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), auxBuffer);
+        //messageToSend = "Teste antes do Banido";        
+        //serverUtils.sendMessageToUniqueClient(auxHandler.encryptMessage(messageToSend), auxBuffer);
+        System.out.println("AuxHandler " + auxHandler);
+        messageToSend = "BANIDO_DA_SALA " + words[1];
+        serverUtils.sendMessageToUniqueClient(auxHandler.encryptMessage(messageToSend), auxBuffer);
+        System.out.println("AuthHandler " + authHandler);
+        //System.out.println("messageToSend: " + messageToSend);
+        //System.out.println("Auxbuffer" + auxBuffer);
+       
 
         messageToSend = "BANIMENTO_OK " + words[2];
         serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
+        //System.out.println("this.bufferedWriter: " + this.bufferedWriter);
 
         messageToSend = "SAIU " + words[1] + " " + words[2];
         
         Set<String> chat_participants;
         chat_participants = chatRoomService.showParticipants(index);
-        System.out.println("messageToSend: " + messageToSend);
+        //System.out.println("messageToSend: " + messageToSend);
         for(String participant : chat_participants){
             System.out.println(participant);
             serverUtils.broadcastBanUser(messageToSend, participant, words[1], connectionHandler.getClientUsername(), words[2]); 
