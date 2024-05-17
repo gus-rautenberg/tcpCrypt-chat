@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.io.IOException;
 import service.ConnectionHandler;
 
-
 public class Server {
     private ServerSocket serverSocket;
 
@@ -31,18 +30,18 @@ public class Server {
                 threadConnectionHandler.start();
             }
         } catch (IOException e) {
-            
+
             System.err.println("Error: " + e);
         }
     }
-    public void close(){
+
+    public void close() {
         try {
-            if(serverSocket != null){
+            if (serverSocket != null) {
                 serverSocket.close();
             }
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException igException) {
         }
     }
 
