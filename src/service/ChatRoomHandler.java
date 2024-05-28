@@ -41,10 +41,7 @@ public class ChatRoomHandler {
             serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
             return;
         }
-        // fazer listagem + adcionar os usarios no meu chatHandler
-        // System.out.println("Message: " + words[2]);
-        // System.out.println("Chat Room: " + words[1]);
-        // System.out.println("Cliente : " + clientUsername);
+
         int index = chatRoomService.getChatRoomIndexByName(words[1]);
         Set<String> chat_participants;
         chat_participants = chatRoomService.showParticipants(index);
@@ -64,12 +61,7 @@ public class ChatRoomHandler {
 
     }
 
-    // public void removeClientHandler(ConnectionHandler connectionHandler) {
-    // connectionHandler.getConnHandlers().remove(this);
-    // serverUtils.broadcastMessage("SERVER: " +
-    // connectionHandler.getClientUsername() + " has left the chat");
-    // }
-
+    
     public ChatRoomService getChatRoomService() {
         return chatRoomService;
     }
@@ -134,10 +126,11 @@ public class ChatRoomHandler {
             serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), bufWriter);
         }
 
+        messageToSend = "SALAS"; // arrumar print
         for (ChatRoom chatRoom : chatRoomService.getAllChatRooms()) {
-            messageToSend = "NOME: " + chatRoom.getName() + " Privada:" + chatRoom.isPrivate(); // arrumar print
-            serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
+            messageToSend += " " + chatRoom.getName();
         }
+        serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
 
     }
 
@@ -221,8 +214,7 @@ public class ChatRoomHandler {
             serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
             return;
         }
-        // System.out.println("Teste1:" + !chatRoomService.comparePassword(index,
-        // words[2]));
+
         System.out.println("requiresPassword: " + chatRoomService.requiresPassword(index));
         if (chatRoomService.requiresPassword(index)) {
             if (words.length < 3) {
@@ -240,8 +232,7 @@ public class ChatRoomHandler {
             return;
         }
         chatRoomService.joinChatRoom(index, connectionHandler.getClientUsername());
-        // System.out.println("Chat Room Joined: " +
-        // chatRoomService.showParticipants(index));
+
         messageToSend = "ENTRAR_SALA_OK " + words[1] + " " + chatRoomService.showParticipants(index);
         serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
         messageToSend = "ENTROU " + words[1] + " " + connectionHandler.getClientUsername();
@@ -322,8 +313,7 @@ public class ChatRoomHandler {
 
         int index = chatRoomService.getChatRoomIndexByName(words[1]);
 
-        // System.out.println("Client Username: " +
-        // connectionHandler.getClientUsername());
+
 
         if (!chatRoomService.checkAdminInChatRoom(connectionHandler.getClientUsername(), index)) {
             System.out.println("Client is not an administrator in this Room");
@@ -396,28 +386,28 @@ public class ChatRoomHandler {
                 auxHandler = handler.gAuthenticationService();
             }
         }
-        // messageToSend = "Teste antes do Banido";
-        // serverUtils.sendMessageToUniqueClient(auxHandler.encryptMessage(messageToSend),
-        // auxBuffer);
-        // System.out.println("AuxHandler " + auxHandler);
+
         messageToSend = "BANIDO_DA_SALA " + words[1];
         serverUtils.sendMessageToUniqueClient(auxHandler.encryptMessage(messageToSend), auxBuffer);
-        // System.out.println("AuthHandler " + authHandler);
-        // System.out.println("messageToSend: " + messageToSend);
-        // System.out.println("Auxbuffer" + auxBuffer);
+
 
         messageToSend = "BANIMENTO_OK " + words[2];
         serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
-        // System.out.println("this.bufferedWriter: " + this.bufferedWriter);
 
         messageToSend = "SAIU " + words[1] + " " + words[2];
 
         Set<String> chat_participants;
         chat_participants = chatRoomService.showParticipants(index);
-        // System.out.println("messageToSend: " + messageToSend);
         for (String participant : chat_participants) {
             serverUtils.broadcastBanUser(messageToSend, participant, words[1], connectionHandler.getClientUsername(),
                     words[2]);
         }
+    }
+
+    public void invalidOperation(String[] words, ConnectionHandler connectionHandler, AuthenticationService authHandler )throws IOException {
+        String messageToSend = "ERRO Invalid Operation. Try again";
+        serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
+
+        return;
     }
 }

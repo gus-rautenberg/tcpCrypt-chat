@@ -106,16 +106,7 @@ public class ChatRoomService {
         chatRooms.get(index).removeParticipant(username);
         chatRooms.get(index).addBannedUser(username);
     }
-    // public boolean chatRoomNameUnique(String roomName){
 
-    // for (ChatRoom chatRoom : chatRooms) {
-    // if (chatRoom.getName().equals(roomName)) {
-    // return false;
-    // }
-    // }
-    // return true;
-    // }
-    // Outros métodos para gerenciar as salas de chat
     public void joinChatRoom(int index, String userPort) {
         chatRooms.get(index).addParticipant(userPort);
     }

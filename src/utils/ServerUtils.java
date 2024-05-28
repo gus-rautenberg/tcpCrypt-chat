@@ -58,7 +58,7 @@ public class ServerUtils {
             try {
 
                 if(!clientHandler.getClientUsername().equals(remetente) && clientHandler.getClientUsername().equals(participant)){
-                    String finalMessage = "MENSAGEM " + chatRoom + " " + remetente + ": " + messageToSend;
+                    String finalMessage = "MENSAGEM " + chatRoom + " " + remetente + " " + messageToSend;
                     sendMessageToUniqueClient(clientHandler.gAuthenticationService().encryptMessage(finalMessage), clientHandler.getBufferedWriter());
                 }
             } catch (IOException e) {

@@ -34,11 +34,7 @@ public class ConnectionHandler implements Runnable {
             this.clientSocket = clientSocket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            // this.clientUsername = bufferedReader.readLine();
-            // connHandlers.add(this);
-            // broadcastMessage("SERVER: " + clientUsername + " has entered the chat");
 
-            // this.chatRoomService = ChatRoomService.getInstance();
             authHandler = new AuthenticationService(this.bufferedWriter, clientSocket);
         } catch (IOException e) {
             closeEverything();
@@ -106,7 +102,7 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     case "LISTAR_SALAS":
-                        chatRoomHandler.listAllChatRooms(words, this, authHandler); // tirar tp de sala
+                        chatRoomHandler.listAllChatRooms(words, this, authHandler); // acho que ta certo
                         break;
 
                     case "ENTRAR_SALA":
@@ -118,7 +114,7 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     case "ENVIAR_MENSAGEM":
-                        chatRoomHandler.sendMessage(words, this, authHandler); // retirar dois pontos
+                        chatRoomHandler.sendMessage(words, this, authHandler); // acho que ta ok
                         break;
 
                     case "FECHAR_SALA":
@@ -130,9 +126,9 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     default:
-                        // caso uausio mandar coisa invalida
-                        // caso o usuario fechar o client ctrl-c buga server e vice-versa
-                        // retirar prints desnecessarios
+                        // if(crypto == true) {
+                        //     chatRoomHandler.invalidOperation(words, this, authHandler);
+                        // }
                         break;
                 }
                 // broadcastMessage(messageFromClient);
@@ -144,9 +140,7 @@ public class ConnectionHandler implements Runnable {
     }
 
     public void closeEverything() {
-        // removeClientHandler();
-        // ServerUtils utils = new ServerUtils(bufferedWriter);
-        // utils.broadcastMessageEveryone();
+
         try {
             ChatRoomHandler chatRoomHandler = new ChatRoomHandler(this.bufferedWriter, this.clientSocket);
 
@@ -173,26 +167,3 @@ public class ConnectionHandler implements Runnable {
     }
 
 }
-
-// public void run() {
-// try {
-// ObjectOutputStream output = new
-// ObjectOutputStream(clientSocket.getOutputStream());
-// output.flush();
-// ObjectInputStream input = new
-// ObjectInputStream(clientSocket.getInputStream());
-
-// String message = "";
-// do {
-// message = (String) input.readObject();
-// System.out.println("Client>> " + message);
-
-// } while (!message.equals("SAIR"));
-
-// output.close();
-// input.close();
-// clientSocket.close();
-// } catch (Exception e) {
-// System.err.println("Error: " + e);
-// }
-// }
