@@ -60,6 +60,7 @@ public class ConnectionHandler implements Runnable {
     public Socket getClientSocket() {
         return clientSocket;
     }
+
     public HashMap<ConnectionHandler, String> getConnHandlers() {
         return connHandlers;
     }
@@ -77,21 +78,21 @@ public class ConnectionHandler implements Runnable {
                 String messageFromClient;
                 messageFromClient = bufferedReader.readLine();
                 try {
-                    if(crypto) {
+                    if (crypto) {
                         System.out.println("Agora ta criptografado");
                         messageFromClient = authHandler.decryptMessageFromClient(messageFromClient);
                     }
-                    
+
                 } catch (Exception e) {
                     e.printStackTrace();
-                } 
-                    String[] words = messageFromClient.split(" ");
-                
+                }
+                String[] words = messageFromClient.split(" ");
+
                 switch (words[0]) {
                     case "REGISTRO":
                         userService.register(words, this, authHandler);
                         break;
-                    case "AUTENTICACAO":    
+                    case "AUTENTICACAO":
                         authHandler.sendPublicKeyToClient();
                         break;
                     case "CHAVE_SIMETRICA":
@@ -99,13 +100,13 @@ public class ConnectionHandler implements Runnable {
                         authHandler.decryptSimetricKey(words[1]);
                         crypto = true;
                         break;
-                        
+
                     case "CRIAR_SALA":
                         chatRoomHandler.createRoom(words, this, authHandler);
                         break;
 
                     case "LISTAR_SALAS":
-                        chatRoomHandler.listAllChatRooms(words, this, authHandler);
+                        chatRoomHandler.listAllChatRooms(words, this, authHandler); // tirar tp de sala
                         break;
 
                     case "ENTRAR_SALA":
@@ -117,7 +118,7 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     case "ENVIAR_MENSAGEM":
-                        chatRoomHandler.sendMessage(words, this, authHandler);
+                        chatRoomHandler.sendMessage(words, this, authHandler); // retirar dois pontos
                         break;
 
                     case "FECHAR_SALA":
@@ -129,7 +130,9 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     default:
-                        
+                        // caso uausio mandar coisa invalida
+                        // caso o usuario fechar o client ctrl-c buga server e vice-versa
+                        // retirar prints desnecessarios
                         break;
                 }
                 // broadcastMessage(messageFromClient);
@@ -139,7 +142,6 @@ public class ConnectionHandler implements Runnable {
             }
         }
     }
-
 
     public void closeEverything() {
         // removeClientHandler();
@@ -160,7 +162,7 @@ public class ConnectionHandler implements Runnable {
                 this.clientSocket.close();
             }
         } catch (IOException ignorException) {
-            
+
         }
     }
 
@@ -169,8 +171,6 @@ public class ConnectionHandler implements Runnable {
         bufWriter.newLine();
         bufWriter.flush();
     }
-
-    
 
 }
 

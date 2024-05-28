@@ -223,10 +223,14 @@ public class ChatRoomHandler {
         }
         // System.out.println("Teste1:" + !chatRoomService.comparePassword(index,
         // words[2]));
-        if (chatRoomService.requiresPassword(index) && words.length < 3) {
-            messageToSend = "Erro No Password";
-            serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
-            return;
+        System.out.println("requiresPassword: " + chatRoomService.requiresPassword(index));
+        if (chatRoomService.requiresPassword(index)) {
+            if (words.length < 3) {
+                messageToSend = "Erro No Password";
+                serverUtils.sendMessageToUniqueClient(authHandler.encryptMessage(messageToSend), this.bufferedWriter);
+                return;
+
+            }
         }
         if (chatRoomService.requiresPassword(index) && !chatRoomService.comparePassword(index, words[2])) {
             System.out.println("Wrong password");

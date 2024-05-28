@@ -76,7 +76,7 @@ public class ChatRoomService {
     }
 
     public boolean requiresPassword(int index) {
-        System.out.println("Precisa de ssenha: " + chatRooms.get(index).requiresPassword());
+        System.out.println("Precisa de senha: " + chatRooms.get(index).requiresPassword());
         return chatRooms.get(index).requiresPassword();
     }
 
@@ -89,11 +89,12 @@ public class ChatRoomService {
         return false;
     }
 
-    public boolean isUserBanned(String username, int index){
+    public boolean isUserBanned(String username, int index) {
         Set<String> bannedUsers = chatRooms.get(index).getBannedUsers();
-        if(bannedUsers == null) return false;
-        for(String bannedUser : bannedUsers){
-            if(bannedUser.equals(username)){
+        if (bannedUsers == null)
+            return false;
+        for (String bannedUser : bannedUsers) {
+            if (bannedUser.equals(username)) {
                 return true;
             }
         }
