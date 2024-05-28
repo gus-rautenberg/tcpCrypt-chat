@@ -34,11 +34,7 @@ public class ConnectionHandler implements Runnable {
             this.clientSocket = clientSocket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            // this.clientUsername = bufferedReader.readLine();
-            // connHandlers.add(this);
-            // broadcastMessage("SERVER: " + clientUsername + " has entered the chat");
 
-            // this.chatRoomService = ChatRoomService.getInstance();
             authHandler = new AuthenticationService(this.bufferedWriter, clientSocket);
         } catch (IOException e) {
             closeEverything();
@@ -60,6 +56,7 @@ public class ConnectionHandler implements Runnable {
     public Socket getClientSocket() {
         return clientSocket;
     }
+
     public HashMap<ConnectionHandler, String> getConnHandlers() {
         return connHandlers;
     }
@@ -77,21 +74,21 @@ public class ConnectionHandler implements Runnable {
                 String messageFromClient;
                 messageFromClient = bufferedReader.readLine();
                 try {
-                    if(crypto) {
+                    if (crypto) {
                         System.out.println("Agora ta criptografado");
                         messageFromClient = authHandler.decryptMessageFromClient(messageFromClient);
                     }
-                    
+
                 } catch (Exception e) {
                     e.printStackTrace();
-                } 
-                    String[] words = messageFromClient.split(" ");
-                
+                }
+                String[] words = messageFromClient.split(" ");
+
                 switch (words[0]) {
                     case "REGISTRO":
                         userService.register(words, this, authHandler);
                         break;
-                    case "AUTENTICACAO":    
+                    case "AUTENTICACAO":
                         authHandler.sendPublicKeyToClient();
                         break;
                     case "CHAVE_SIMETRICA":
@@ -99,13 +96,13 @@ public class ConnectionHandler implements Runnable {
                         authHandler.decryptSimetricKey(words[1]);
                         crypto = true;
                         break;
-                        
+
                     case "CRIAR_SALA":
                         chatRoomHandler.createRoom(words, this, authHandler);
                         break;
 
                     case "LISTAR_SALAS":
-                        chatRoomHandler.listAllChatRooms(words, this, authHandler);
+                        chatRoomHandler.listAllChatRooms(words, this, authHandler); // acho que ta certo
                         break;
 
                     case "ENTRAR_SALA":
@@ -117,7 +114,7 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     case "ENVIAR_MENSAGEM":
-                        chatRoomHandler.sendMessage(words, this, authHandler);
+                        chatRoomHandler.sendMessage(words, this, authHandler); // acho que ta ok
                         break;
 
                     case "FECHAR_SALA":
@@ -129,7 +126,9 @@ public class ConnectionHandler implements Runnable {
                         break;
 
                     default:
-                        
+                        // if(crypto == true) {
+                        //     chatRoomHandler.invalidOperation(words, this, authHandler);
+                        // }
                         break;
                 }
                 // broadcastMessage(messageFromClient);
@@ -140,11 +139,8 @@ public class ConnectionHandler implements Runnable {
         }
     }
 
-
     public void closeEverything() {
-        // removeClientHandler();
-        // ServerUtils utils = new ServerUtils(bufferedWriter);
-        // utils.broadcastMessageEveryone();
+
         try {
             ChatRoomHandler chatRoomHandler = new ChatRoomHandler(this.bufferedWriter, this.clientSocket);
 
@@ -160,7 +156,7 @@ public class ConnectionHandler implements Runnable {
                 this.clientSocket.close();
             }
         } catch (IOException ignorException) {
-            
+
         }
     }
 
@@ -170,29 +166,4 @@ public class ConnectionHandler implements Runnable {
         bufWriter.flush();
     }
 
-    
-
 }
-
-// public void run() {
-// try {
-// ObjectOutputStream output = new
-// ObjectOutputStream(clientSocket.getOutputStream());
-// output.flush();
-// ObjectInputStream input = new
-// ObjectInputStream(clientSocket.getInputStream());
-
-// String message = "";
-// do {
-// message = (String) input.readObject();
-// System.out.println("Client>> " + message);
-
-// } while (!message.equals("SAIR"));
-
-// output.close();
-// input.close();
-// clientSocket.close();
-// } catch (Exception e) {
-// System.err.println("Error: " + e);
-// }
-// }

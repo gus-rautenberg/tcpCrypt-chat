@@ -17,7 +17,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import utils.ServerUtils;
 
-
 public class AuthenticationService {
     private ServerUtils serverUtils;
     private Socket clientSocket;
@@ -25,7 +24,7 @@ public class AuthenticationService {
     private PublicKey publicKey;
     private SecretKey aesKey;
 
-    public AuthenticationService(BufferedWriter bufferedWriter, Socket clientSocket){
+    public AuthenticationService(BufferedWriter bufferedWriter, Socket clientSocket) {
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(1024);
@@ -35,34 +34,36 @@ public class AuthenticationService {
             this.serverUtils = new ServerUtils(bufferedWriter);
             this.clientSocket = clientSocket;
 
-        } catch(Exception e) {  
+        } catch (Exception e) {
             e.printStackTrace();
-        
+
         }
     }
 
-    public void sendPublicKeyToClient() throws IOException{
+    public void sendPublicKeyToClient() throws IOException {
         byte[] msgEncriptada = this.publicKey.getEncoded();
-        // System.out.println("Chave publica antes da base: " + msgEncriptada);
         String messageToSend = "CHAVE_PUBLICA " + Base64.getEncoder().encodeToString(msgEncriptada);
         BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-        // System.out.println("Sending public key to client:" + messageToSend);
         serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
     }
 
-    public void decryptSimetricKey(String key)  {
+    public void decryptSimetricKey(String key) {
         try {
             byte[] authRequestBytes = Base64.getDecoder().decode(key);
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.DECRYPT_MODE, privateKey); // privateKey é a chave privada do servidor
             byte[] aesKeyBytes = cipher.doFinal(authRequestBytes);
-    
+
             // Reconstruir a chave AES
             this.aesKey = new SecretKeySpec(aesKeyBytes, "AES");
-            byte[] chave = this.aesKey.getEncoded();
-            // System.out.println("Chave AES: " + chave);
 
-        }catch(Exception e) {
+            byte[] chave = this.aesKey.getEncoded();
+            for (int i = 0; i < chave.length; i++) {
+                System.out.printf("%d ", chave[i]);
+            }
+            System.out.println("Chave AES: " + chave);
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -75,7 +76,6 @@ public class AuthenticationService {
             cipher.init(Cipher.DECRYPT_MODE, aesKey); // aesKey é a chave AES criada pelo servidor
             byte[] decryptedMessageBytes = cipher.doFinal(messageBytes);
             String decryptedMessage = new String(decryptedMessageBytes);
-            // System.out.println("Decrypted message: " + decryptedMessage);
             return decryptedMessage;
         } catch (Exception e) {
             e.printStackTrace();
@@ -83,25 +83,27 @@ public class AuthenticationService {
 
         }
     }
-    public String encryptMessage(String Message){
+
+    public String encryptMessage(String Message) {
         try {
             Cipher cif = Cipher.getInstance("AES");
             cif.init(Cipher.ENCRYPT_MODE, this.aesKey);
-    
+
             byte[] buffer = cif.doFinal(Message.getBytes());
             String messageToSend = Base64.getEncoder().encodeToString(buffer);
-            return messageToSend;            
+            System.out.println("Encrypted message: " + messageToSend);
+            return messageToSend;
         } catch (Exception e) {
             e.printStackTrace();
             return "ERRO: Failed to encrypt message";
-        }  
+        }
     }
 
-    public void encryptedMessage(String Message){
+    public void encryptedMessage(String Message) {
         try {
             Cipher cif = Cipher.getInstance("AES");
             cif.init(Cipher.ENCRYPT_MODE, this.aesKey);
-    
+
             byte[] buffer = cif.doFinal(Message.getBytes());
             String messageToSend = Base64.getEncoder().encodeToString(buffer);
             BufferedWriter bufWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
@@ -109,8 +111,7 @@ public class AuthenticationService {
             serverUtils.sendMessageToUniqueClient(messageToSend, bufWriter);
         } catch (Exception e) {
             e.printStackTrace();
-        }  
-    } 
-
+        }
+    }
 
 }
